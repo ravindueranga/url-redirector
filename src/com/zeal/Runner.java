@@ -11,28 +11,34 @@ import java.util.stream.Collectors;
 
 class Runner {
 
+    static final String FOLDER_NAME = "files";
+    static final String REDIRECTED_LIST = "redirected lists";
+    static final int RECORD_THRESHOLD = 500;
+
     void run() throws IOException {
 
-        final String folder = "files";
-        final String redirectedList = "redirected lists";
+        createFolder(REDIRECTED_LIST);
 
-        boolean isCreated = createFolder(redirectedList);
-
-        List<String> fileList = listFilesForFolder(folder);
+        List<String> fileList = listFilesForFolder(FOLDER_NAME);
 
         for (String s : fileList) {
 
+            int counter = 0;
+
             System.out.println(s);
 
-            FileWriter fw = new FileWriter(redirectedList + "/" + s.substring(0, s.length() - 4) + "_redir.txt", true);
+            FileWriter fw = new FileWriter(REDIRECTED_LIST + "/" + s.substring(0, s.length() - 4) + "_redir.txt", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw);
 
             try {
-                BufferedReader br = new BufferedReader(new FileReader(folder + "/" + s));
+                BufferedReader br = new BufferedReader(new FileReader(FOLDER_NAME + "/" + s));
                 String str;
                 while ((str = br.readLine()) != null) {
-
+                    ++counter;
+                    if (counter % RECORD_THRESHOLD == 0) {
+                        System.out.println(RECORD_THRESHOLD + " urls reached");
+                    }
                     try {
                         str = str.replace("\uFEFF", "");
 
@@ -94,7 +100,7 @@ class Runner {
     }
 
     /**
-     * Get all the file names in a given folder
+     * Get all the file names in a given FOLDER_NAME
      *
      * @param folderPath
      * @return
