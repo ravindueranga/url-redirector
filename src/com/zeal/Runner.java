@@ -13,7 +13,7 @@ class Runner {
 
     static final String FOLDER_NAME = "files";
     static final String REDIRECTED_LIST = "redirected lists";
-    static final int RECORD_THRESHOLD = 500;
+    static final int RECORD_THRESHOLD = 250;
 
     void run() throws IOException {
 
@@ -39,28 +39,10 @@ class Runner {
                     if (counter % RECORD_THRESHOLD == 0) {
                         System.out.println(RECORD_THRESHOLD + " urls reached");
                     }
-                    try {
-                        str = str.replace("\uFEFF", "");
 
-                        HttpURLConnection con = createConnection(str);
-                        con.connect();
+                    str = str.replace("\uFEFF", "");
 
-                        if (con.getResponseCode() != 200) {
-
-                            String location = con.getHeaderField("Location");
-                            if (location == null || !location.contains("http")) {
-                                out.println(str);
-                            } else {
-                                out.println(location);
-                            }
-
-                        } else {
-                            out.println(str);
-                        }
-                    } catch (Exception e) {
-                        out.println(str);
-                    }
-
+                    out.println(getRedirectedUrl(str));
                 }
 
             } finally {
@@ -70,6 +52,35 @@ class Runner {
         }
 
         System.out.println("Done getting redirected URLs");
+    }
+
+    /**
+     * This method will get the redirected url of a given url if there is any. If not pass the url back as it is
+     *
+     * @param url
+     * @return
+     */
+    private String getRedirectedUrl(String url) {
+
+        try {
+            HttpURLConnection con = createConnection(url);
+            con.connect();
+
+            if (con.getResponseCode() != 200) {
+
+                String location = con.getHeaderField("Location");
+                if (location == null || !location.contains("http")) {
+                    return url;
+                } else {
+                    return location;
+                }
+
+            } else {
+                return url;
+            }
+        } catch (Exception e) {
+            return url;
+        }
     }
 
     private HttpURLConnection createConnection(String str) {
